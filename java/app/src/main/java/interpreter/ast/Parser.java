@@ -4,6 +4,7 @@ import interpreter.lexer.Lexer;
 import interpreter.token.Token;
 import interpreter.token.TokenType;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.Validate;
 
@@ -15,12 +16,14 @@ import static java.util.Objects.nonNull;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class Parser {
     private final Lexer lexer;
+    @Getter
+    private final List<String> errors;
     private Token currToken;
     private Token peekToken;
 
     public static Parser build(Lexer lexer) {
         Validate.notNull(lexer, "lexer should not be null");
-        Parser parser = new Parser(lexer);
+        Parser parser = new Parser(lexer, new ArrayList<>());
 
         // Make sure currToken and peekToken are set
         parser.nextToken();
@@ -54,10 +57,35 @@ public class Parser {
     }
 
     private LetStatement parseLetStatement() {
-        if (!TokenType.IDENT.equals(peekToken.type())) {
+        if (!expectPeek(TokenType.IDENT)) {
             return null;
         }
 
-        return new LetStatement(currToken, new Identifier(peekToken));
+        LetStatement statement = new LetStatement(currToken, new Identifier(peekToken));
+        nextToken();
+
+        if (!expectPeek(TokenType.ASSIGN)) {
+            return null;
+        }
+        while (!currToken.type().equals(TokenType.SEMICOLON)) {
+            nextToken();
+        }
+        return statement;
+    }
+
+    private boolean expectPeek(TokenType expectedPeekType) {
+        if (expectedPeekType.equals(peekToken.type())) {
+            return true;
+        } else {
+            peekError(expectedPeekType);
+            return false;
+        }
+    }
+
+    private void peekError(TokenType expectedTokenType) {
+        errors.add(
+                "expecting next token to be %s, got %s instead"
+                        .formatted(expectedTokenType, peekToken.type())
+        );
     }
 }

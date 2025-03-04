@@ -23,6 +23,9 @@ class ParserTest {
         var parser = Parser.build(lexer);
 
         var actual = parser.parseProgram();
+        var errors = parser.getErrors();
+
+        assertThat(errors).isEmpty();
 
         assertThat(actual).isNotNull()
                 .extracting(Program::statements).asInstanceOf(LIST)
