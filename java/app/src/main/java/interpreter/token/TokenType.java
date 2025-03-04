@@ -1,8 +1,8 @@
 package interpreter.token;
 
 public enum TokenType {
-    ILLEGAL,
     EOF,
+    ILLEGAL,
 
     // Identifier + literals
     IDENT,
@@ -10,18 +10,30 @@ public enum TokenType {
 
     // Operators
     ASSIGN,
+    ASTERISK,
+    BANG,
+    GT,
+    LT,
+    MINUS,
     PLUS,
+    SLASH,
 
     // Delimiters
     COMMA,
+    LBRACE,
+    LPAREN,
+    RBRACE,
+    RPAREN,
     SEMICOLON,
 
-    LPAREN,
-    RPAREN,
-    LBRACE,
-    RBRACE,
-
     // Keywords
+    ELSE,
+    EQ,
+    FALSE,
     FUNCTION,
-    LET
+    IF,
+    LET,
+    NOT_EQ,
+    RETURN,
+    TRUE,
 }
