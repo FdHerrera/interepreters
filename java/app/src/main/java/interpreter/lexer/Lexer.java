@@ -39,9 +39,25 @@ public class Lexer {
             readChar();
         }
         return switch (ch) {
-            case '=' -> newToken(TokenType.ASSIGN, ch);
+            case '=' -> {
+                if (peekChar() == '=') {
+                    readChar();
+                    readChar();
+                    yield new Token(TokenType.EQ, "==");
+                } else {
+                    yield newToken(TokenType.ASSIGN, ch);
+                }
+            }
             case '*' -> newToken(TokenType.ASTERISK, ch);
-            case '!' -> newToken(TokenType.BANG, ch);
+            case '!' -> {
+                if (peekChar() == '=') {
+                    readChar();
+                    readChar();
+                    yield new Token(TokenType.NOT_EQ, "!=");
+                } else {
+                    yield newToken(TokenType.BANG, ch);
+                }
+            }
             case '>' -> newToken(TokenType.GT, ch);
             case '<' -> newToken(TokenType.LT, ch);
             case '-' -> newToken(TokenType.MINUS, ch);
@@ -69,6 +85,14 @@ public class Lexer {
                 }
             }
         };
+    }
+
+    private char peekChar() {
+        if (readPosition >= input.length()) {
+            return '\0';
+        } else {
+            return input.charAt(readPosition);
+        }
     }
 
     private String readIdentifier(Predicate<Character> condition) {

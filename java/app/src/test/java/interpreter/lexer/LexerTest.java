@@ -31,11 +31,9 @@ class LexerTest {
                 } else {
                 	return false;
                 }
+                10 == 10;
+                10 != 9;
                 """;
-//
-//        10 == 10;
-//        10 != 9;
-//        """;
 
         List<Pair<TokenType, String>> expectedResults = List.<Pair<TokenType, String>>of(
                 Pair.of(TokenType.LET, "let"),
@@ -102,16 +100,16 @@ class LexerTest {
                 Pair.of(TokenType.RETURN, "return"),
                 Pair.of(TokenType.FALSE, "false"),
                 Pair.of(TokenType.SEMICOLON, ";"),
-                Pair.of(TokenType.RBRACE, "}")
-//        Pair.of(TokenType.INT, "10"),
-//        Pair.of(TokenType.EQ, "=="),
-//        Pair.of(TokenType.INT, "10"),
-//        Pair.of(TokenType.SEMICOLON, ";"),
-//        Pair.of(TokenType.INT, "10"),
-//        Pair.of(TokenType.NOT_EQ, "!="),
-//        Pair.of(TokenType.INT, "9"),
-//        Pair.of(TokenType.SEMICOLON, ";"),
-//        Pair.of(TokenType.EOF, "")
+                Pair.of(TokenType.RBRACE, "}"),
+                Pair.of(TokenType.INT, "10"),
+                Pair.of(TokenType.EQ, "=="),
+                Pair.of(TokenType.INT, "10"),
+                Pair.of(TokenType.SEMICOLON, ";"),
+                Pair.of(TokenType.INT, "10"),
+                Pair.of(TokenType.NOT_EQ, "!="),
+                Pair.of(TokenType.INT, "9"),
+                Pair.of(TokenType.SEMICOLON, ";"),
+                Pair.of(TokenType.EOF, String.valueOf('\0'))
         );
 
         Lexer lexer = new Lexer(input);
