@@ -2,7 +2,15 @@ package interpreter.lexer;
 
 import interpreter.token.Token;
 import interpreter.token.TokenType;
+import interpreter.token.TokenUtil;
 import lombok.Getter;
+
+import java.util.function.Predicate;
+
+import static java.lang.Character.isDigit;
+import static java.lang.Character.isLetter;
+import static java.lang.Character.isWhitespace;
+import static org.apache.commons.lang3.math.NumberUtils.isDigits;
 
 @Getter
 public class Lexer {
@@ -27,7 +35,10 @@ public class Lexer {
     }
 
     public Token nextToken() {
-        Token token = switch (ch) {
+        while (isWhitespace(ch)) {
+            readChar();
+        }
+        return switch (ch) {
             case '=' -> newToken(TokenType.ASSIGN, ch);
             case '+' -> newToken(TokenType.PLUS, ch);
             case '(' -> newToken(TokenType.LPAREN, ch);
@@ -37,13 +48,34 @@ public class Lexer {
             case ',' -> newToken(TokenType.COMMA, ch);
             case ';' -> newToken(TokenType.SEMICOLON, ch);
             case '\0' -> newToken(TokenType.EOF, ch);
-            default -> throw new IllegalStateException("Unexpected value: " + ch);
+            default -> {
+                if (isLetter(ch)) {
+                    String identifier = readIdentifier(Character::isLetter);
+                    yield new Token(TokenUtil.getTypeForIdentifier(identifier), identifier);
+                } else if (isDigit(ch)) {
+                    String identifier = readIdentifier(Character::isDigit);
+                    if (isDigits(identifier)) {
+                        yield new Token(TokenType.INT, identifier);
+                    }
+                    yield new Token(TokenType.ILLEGAL, identifier);
+                } else {
+                    yield new Token(TokenType.ILLEGAL, String.valueOf(ch));
+                }
+            }
         };
-        readChar();
-        return token;
     }
 
-    private Token newToken(TokenType type, char ch) {
-        return new Token(type, String.valueOf(ch));
+    private String readIdentifier(Predicate<Character> condition) {
+        int currentPosition = position;
+        while (condition.test(ch) || ch == '_') {
+            readChar();
+        }
+        return input.substring(currentPosition, position);
+    }
+
+    private Token newToken(TokenType type, char character) {
+        Token token = new Token(type, String.valueOf(character));
+        readChar();
+        return token;
     }
 }
