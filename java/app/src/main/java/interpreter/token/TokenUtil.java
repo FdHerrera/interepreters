@@ -8,8 +8,13 @@ import java.util.Map;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TokenUtil {
     private static final Map<String, TokenType> KEYWORDS = Map.of(
+            "else", TokenType.ELSE,
+            "false", TokenType.FALSE,
             "fn", TokenType.FUNCTION,
-            "let", TokenType.LET
+            "if", TokenType.IF,
+            "let", TokenType.LET,
+            "return", TokenType.RETURN,
+            "true", TokenType.TRUE
     );
 
     public static TokenType getTypeForIdentifier(String identifier) {

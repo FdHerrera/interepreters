@@ -40,7 +40,13 @@ public class Lexer {
         }
         return switch (ch) {
             case '=' -> newToken(TokenType.ASSIGN, ch);
+            case '*' -> newToken(TokenType.ASTERISK, ch);
+            case '!' -> newToken(TokenType.BANG, ch);
+            case '>' -> newToken(TokenType.GT, ch);
+            case '<' -> newToken(TokenType.LT, ch);
+            case '-' -> newToken(TokenType.MINUS, ch);
             case '+' -> newToken(TokenType.PLUS, ch);
+            case '/' -> newToken(TokenType.SLASH, ch);
             case '(' -> newToken(TokenType.LPAREN, ch);
             case ')' -> newToken(TokenType.RPAREN, ch);
             case '{' -> newToken(TokenType.LBRACE, ch);
