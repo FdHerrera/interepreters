@@ -39,4 +39,31 @@ class ParserTest {
                 );
     }
 
+    @Test
+    void testReturnStatements() {
+        String input = """
+                return 5;
+                return 10;
+                return 993322;
+                """;
+        var lexer = new Lexer(input);
+        var parser = Parser.build(lexer);
+
+        var actual = parser.parseProgram();
+        var errors = parser.getErrors();
+
+        assertThat(errors).isEmpty();
+
+        assertThat(actual).isNotNull()
+                .extracting(Program::statements).asInstanceOf(LIST)
+                .hasSize(3)
+                .isEqualTo(
+                        List.of(
+                                new ReturnStatement(new Token(TokenType.RETURN, "return"), null),
+                                new ReturnStatement(new Token(TokenType.RETURN, "return"), null),
+                                new ReturnStatement(new Token(TokenType.RETURN, "return"), null)
+                        )
+                );
+    }
+
 }

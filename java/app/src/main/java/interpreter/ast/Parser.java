@@ -52,6 +52,7 @@ public class Parser {
     private Statement parseStatement() {
         return switch (currToken.type()) {
             case LET -> parseLetStatement();
+            case RETURN -> parseReturnStatement();
             default -> null;
         };
     }
@@ -67,6 +68,17 @@ public class Parser {
         if (!expectPeek(TokenType.ASSIGN)) {
             return null;
         }
+        while (!currToken.type().equals(TokenType.SEMICOLON)) {
+            nextToken();
+        }
+        return statement;
+    }
+
+
+    private ReturnStatement parseReturnStatement() {
+        ReturnStatement statement = new ReturnStatement(currToken, null /*for now*/);
+        nextToken();
+
         while (!currToken.type().equals(TokenType.SEMICOLON)) {
             nextToken();
         }
