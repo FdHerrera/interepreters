@@ -7,7 +7,7 @@ import static org.apache.commons.lang3.math.NumberUtils.isDigits;
 
 import interpreter.token.Token;
 import interpreter.token.TokenType;
-import interpreter.token.TokenUtil;
+import interpreter.utils.TokenUtil;
 import java.util.function.Predicate;
 import lombok.Getter;
 

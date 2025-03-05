@@ -1,5 +1,6 @@
 package interpreter.ast;
 
+import static interpreter.utils.PrecedenceUtils.precedenceFor;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,17 @@ public class Parser {
                     this::parsePrefixExpression,
                     TokenType.MINUS,
                     this::parsePrefixExpression);
+
+    private final Map<TokenType, UnaryOperator<Expression>> infixParseFns =
+            Map.of(
+                    TokenType.EQ, this::parseInfixExpression,
+                    TokenType.NOT_EQ, this::parseInfixExpression,
+                    TokenType.LT, this::parseInfixExpression,
+                    TokenType.GT, this::parseInfixExpression,
+                    TokenType.PLUS, this::parseInfixExpression,
+                    TokenType.MINUS, this::parseInfixExpression,
+                    TokenType.SLASH, this::parseInfixExpression,
+                    TokenType.ASTERISK, this::parseInfixExpression);
 
     public static Parser build(Lexer lexer) {
         Validate.notNull(lexer, "lexer should not be null");
@@ -113,7 +126,19 @@ public class Parser {
             noPrefixParseFnError(currToken.type());
             return null;
         }
-        return prefix.get();
+        var leftExpression = prefix.get();
+
+        while (!peekToken.type().equals(TokenType.SEMICOLON)
+                && precedence.ordinal() < precedenceFor(peekToken.type()).ordinal()) {
+            UnaryOperator<Expression> infixParseFunction = infixParseFns.get(peekToken.type());
+            if (isNull(infixParseFunction)) {
+                return leftExpression;
+            }
+            nextToken();
+            leftExpression = infixParseFunction.apply(leftExpression);
+        }
+
+        return leftExpression;
     }
 
     private Expression parsePrefixExpression() {
@@ -124,6 +149,14 @@ public class Parser {
         Expression rightExpression = parseExpression(Precedence.PREFIX);
 
         return new PrefixExpression(prefixOperator, rightExpression);
+    }
+
+    private Expression parseInfixExpression(Expression left) {
+        Token operator = currToken;
+        Precedence precedence = precedenceFor(operator.type());
+        nextToken();
+        Expression right = parseExpression(precedence);
+        return new InfixExpression(left, operator, right);
     }
 
     private boolean expectPeek(TokenType expectedPeekType) {

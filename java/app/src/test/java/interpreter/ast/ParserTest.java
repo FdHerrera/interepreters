@@ -8,6 +8,7 @@ import interpreter.token.Token;
 import interpreter.token.TokenType;
 import java.util.List;
 import java.util.stream.Stream;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -119,8 +120,7 @@ class ParserTest {
                 .hasSize(1)
                 .containsExactly(
                         new ExpressionStatement(
-                                new Token(TokenType.INT, "5"),
-                                new IntegerLiteralExpression(new Token(TokenType.INT, "5"), 5)));
+                                new Token(TokenType.INT, "5"), integerLiteralExpressionOf(5)));
     }
 
     private static Stream<Arguments> prefixExpressionsTests() {
@@ -132,7 +132,6 @@ class ParserTest {
     @ParameterizedTest
     @MethodSource("interpreter.ast.ParserTest#prefixExpressionsTests")
     void testPrefixExpressions(String input, Token expectedToken, Integer expectedIntegerValue) {
-
         var lexer = new Lexer(input);
         var parser = Parser.build(lexer);
 
@@ -141,10 +140,7 @@ class ParserTest {
 
         assertThat(errors).isEmpty();
 
-        var expectedLiteral =
-                new IntegerLiteralExpression(
-                        new Token(TokenType.INT, expectedIntegerValue.toString()),
-                        expectedIntegerValue);
+        var expectedLiteral = integerLiteralExpressionOf(expectedIntegerValue);
 
         assertThat(actual)
                 .isNotNull()
@@ -155,5 +151,79 @@ class ParserTest {
                         new ExpressionStatement(
                                 new Token(TokenType.INT, expectedIntegerValue.toString()),
                                 new PrefixExpression(expectedToken, expectedLiteral)));
+    }
+
+    private static Stream<Arguments> infixExpressionsTests() {
+        return Stream.of(
+                Arguments.of(
+                        "5 + 5;",
+                        integerLiteralExpressionOf(5),
+                        new Token(TokenType.PLUS, "+"),
+                        integerLiteralExpressionOf(5)),
+                Arguments.of(
+                        "5 - 5;",
+                        integerLiteralExpressionOf(5),
+                        new Token(TokenType.MINUS, "-"),
+                        integerLiteralExpressionOf(5)),
+                Arguments.of(
+                        "5 * 5;",
+                        integerLiteralExpressionOf(5),
+                        new Token(TokenType.ASTERISK, "*"),
+                        integerLiteralExpressionOf(5)),
+                Arguments.of(
+                        "5 / 5;",
+                        integerLiteralExpressionOf(5),
+                        new Token(TokenType.SLASH, "/"),
+                        integerLiteralExpressionOf(5)),
+                Arguments.of(
+                        "5 > 5;",
+                        integerLiteralExpressionOf(5),
+                        new Token(TokenType.GT, ">"),
+                        integerLiteralExpressionOf(5)),
+                Arguments.of(
+                        "5 < 5;",
+                        integerLiteralExpressionOf(5),
+                        new Token(TokenType.LT, "<"),
+                        integerLiteralExpressionOf(5)),
+                Arguments.of(
+                        "5 == 5;",
+                        integerLiteralExpressionOf(5),
+                        new Token(TokenType.EQ, "=="),
+                        integerLiteralExpressionOf(5)),
+                Arguments.of(
+                        "5 != 5;",
+                        integerLiteralExpressionOf(5),
+                        new Token(TokenType.NOT_EQ, "!="),
+                        integerLiteralExpressionOf(5)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("interpreter.ast.ParserTest#infixExpressionsTests")
+    void testInfixExpressions(
+            String input,
+            Expression expectedLeftExpression,
+            Token expectedOperator,
+            Expression expectedRightExpression) {
+        var lexer = new Lexer(input);
+        var parser = Parser.build(lexer);
+
+        var actual = parser.parseProgram();
+        var errors = parser.getErrors();
+
+        assertThat(errors).isEmpty();
+
+        assertThat(actual)
+                .isNotNull()
+                .extracting(Program::statements)
+                .asInstanceOf(InstanceOfAssertFactories.collection(ExpressionStatement.class))
+                .hasSize(1)
+                .extracting(ExpressionStatement::expression)
+                .containsExactly(
+                        new InfixExpression(
+                                expectedLeftExpression, expectedOperator, expectedRightExpression));
+    }
+
+    private static IntegerLiteralExpression integerLiteralExpressionOf(Integer val) {
+        return new IntegerLiteralExpression(new Token(TokenType.INT, val.toString()), val);
     }
 }

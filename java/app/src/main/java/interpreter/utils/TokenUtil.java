@@ -1,5 +1,6 @@
-package interpreter.token;
+package interpreter.utils;
 
+import interpreter.token.TokenType;
 import java.util.Map;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
