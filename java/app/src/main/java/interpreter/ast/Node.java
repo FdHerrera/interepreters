@@ -1,4 +1,3 @@
 package interpreter.ast;
 
-public interface Node {
-}
+public interface Node {}

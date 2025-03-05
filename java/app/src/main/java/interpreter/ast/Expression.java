@@ -1,4 +1,3 @@
 package interpreter.ast;
 
-public interface Expression {
-}
+public interface Expression {}

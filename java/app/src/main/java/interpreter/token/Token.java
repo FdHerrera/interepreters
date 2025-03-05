@@ -1,6 +1,3 @@
 package interpreter.token;
 
-public record Token(
-        TokenType type,
-        String literal) {
-}
+public record Token(TokenType type, String literal) {}

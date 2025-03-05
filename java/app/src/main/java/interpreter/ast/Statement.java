@@ -1,4 +1,3 @@
 package interpreter.ast;
 
-public interface Statement {
-}
+public interface Statement {}

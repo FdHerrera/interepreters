@@ -1,16 +1,15 @@
 package interpreter.lexer;
 
-import interpreter.token.Token;
-import interpreter.token.TokenType;
-import interpreter.token.TokenUtil;
-import lombok.Getter;
-
-import java.util.function.Predicate;
-
 import static java.lang.Character.isDigit;
 import static java.lang.Character.isLetter;
 import static java.lang.Character.isWhitespace;
 import static org.apache.commons.lang3.math.NumberUtils.isDigits;
+
+import interpreter.token.Token;
+import interpreter.token.TokenType;
+import interpreter.token.TokenUtil;
+import java.util.function.Predicate;
+import lombok.Getter;
 
 @Getter
 public class Lexer {

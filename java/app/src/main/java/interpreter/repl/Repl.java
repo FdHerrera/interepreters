@@ -3,7 +3,6 @@ package interpreter.repl;
 import interpreter.lexer.Lexer;
 import interpreter.token.Token;
 import interpreter.token.TokenType;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;

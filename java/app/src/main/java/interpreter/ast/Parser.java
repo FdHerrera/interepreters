@@ -1,32 +1,29 @@
 package interpreter.ast;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+
 import interpreter.lexer.Lexer;
 import interpreter.token.Token;
 import interpreter.token.TokenType;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.Validate;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
-
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class Parser {
     private final Lexer lexer;
-    @Getter
-    private final List<String> errors;
+    @Getter private final List<String> errors;
     private Token currToken;
     private Token peekToken;
 
-    private final Map<TokenType, Supplier<Expression>> prefixParseFns = Map.of(
-            TokenType.IDENT, () -> new Identifier(currToken)
-    );
+    private final Map<TokenType, Supplier<Expression>> prefixParseFns =
+            Map.of(TokenType.IDENT, () -> new Identifier(currToken));
 
     public static Parser build(Lexer lexer) {
         Validate.notNull(lexer, "lexer should not be null");
@@ -81,7 +78,6 @@ public class Parser {
         return statement;
     }
 
-
     private ReturnStatement parseReturnStatement() {
         ReturnStatement statement = new ReturnStatement(currToken, null /*for now*/);
 
@@ -121,7 +117,6 @@ public class Parser {
     private void peekError(TokenType expectedTokenType) {
         errors.add(
                 "expecting next token to be %s, got %s instead"
-                        .formatted(expectedTokenType, peekToken.type())
-        );
+                        .formatted(expectedTokenType, peekToken.type()));
     }
 }

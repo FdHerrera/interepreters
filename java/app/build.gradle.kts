@@ -9,6 +9,7 @@ plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     application
     id("io.freefair.lombok") version "8.12.2.1"
+    id("com.diffplug.spotless") version "7.0.2"
 }
 
 repositories {
@@ -34,6 +35,23 @@ dependencies {
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
+spotless {
+   ratchetFrom("origin/main")
+
+
+    format("misc") {
+    // define the files to apply `misc` to
+    target("*.gradle", "*.md", ".gitignore")
+
+    // define the steps to apply to those files
+    trimTrailingWhitespace()
+    endWithNewline()
+}
+    java {
+      googleJavaFormat("1.25.2").aosp().reflowLongStrings()
     }
 }
 
