@@ -10,7 +10,10 @@ import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -20,6 +23,10 @@ public class Parser {
     private final List<String> errors;
     private Token currToken;
     private Token peekToken;
+
+    private final Map<TokenType, Supplier<Expression>> prefixParseFns = Map.of(
+            TokenType.IDENT, () -> new Identifier(currToken)
+    );
 
     public static Parser build(Lexer lexer) {
         Validate.notNull(lexer, "lexer should not be null");
@@ -53,7 +60,7 @@ public class Parser {
         return switch (currToken.type()) {
             case LET -> parseLetStatement();
             case RETURN -> parseReturnStatement();
-            default -> null;
+            default -> parseExpressionStatement();
         };
     }
 
@@ -77,12 +84,29 @@ public class Parser {
 
     private ReturnStatement parseReturnStatement() {
         ReturnStatement statement = new ReturnStatement(currToken, null /*for now*/);
-        nextToken();
 
-        while (!currToken.type().equals(TokenType.SEMICOLON)) {
+        do {
+            nextToken();
+        } while (!currToken.type().equals(TokenType.SEMICOLON));
+        return statement;
+    }
+
+    private Statement parseExpressionStatement() {
+        var expression = parseExpression(Precedence.LOWEST);
+        var statement = new ExpressionStatement(currToken, expression);
+
+        while (peekToken.type().equals(TokenType.SEMICOLON)) {
             nextToken();
         }
         return statement;
+    }
+
+    private Expression parseExpression(Precedence precedence) {
+        var prefix = prefixParseFns.get(currToken.type());
+        if (isNull(prefix)) {
+            return null;
+        }
+        return prefix.get();
     }
 
     private boolean expectPeek(TokenType expectedPeekType) {
