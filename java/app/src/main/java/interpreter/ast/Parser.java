@@ -24,11 +24,16 @@ public class Parser {
 
     private final Map<TokenType, Supplier<Expression>> prefixParseFns =
             Map.of(
-                    TokenType.IDENT, () -> new Identifier(currToken),
+                    TokenType.IDENT,
+                    () -> new Identifier(currToken),
                     TokenType.INT,
-                            () ->
-                                    new IntegerLiteralExpression(
-                                            currToken, Integer.valueOf(currToken.literal())));
+                    () ->
+                            new IntegerLiteralExpression(
+                                    currToken, Integer.valueOf(currToken.literal())),
+                    TokenType.BANG,
+                    this::parsePrefixExpression,
+                    TokenType.MINUS,
+                    this::parsePrefixExpression);
 
     public static Parser build(Lexer lexer) {
         Validate.notNull(lexer, "lexer should not be null");
@@ -105,9 +110,20 @@ public class Parser {
     private Expression parseExpression(Precedence precedence) {
         var prefix = prefixParseFns.get(currToken.type());
         if (isNull(prefix)) {
+            noPrefixParseFnError(currToken.type());
             return null;
         }
         return prefix.get();
+    }
+
+    private Expression parsePrefixExpression() {
+        Token prefixOperator = currToken;
+
+        nextToken();
+
+        Expression rightExpression = parseExpression(Precedence.PREFIX);
+
+        return new PrefixExpression(prefixOperator, rightExpression);
     }
 
     private boolean expectPeek(TokenType expectedPeekType) {
@@ -123,5 +139,9 @@ public class Parser {
         errors.add(
                 "expecting next token to be %s, got %s instead"
                         .formatted(expectedTokenType, peekToken.type()));
+    }
+
+    private void noPrefixParseFnError(TokenType prefixToken) {
+        errors.add("no prefix parse function found for type: %s".formatted(prefixToken));
     }
 }

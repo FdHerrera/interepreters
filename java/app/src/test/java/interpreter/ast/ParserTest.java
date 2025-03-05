@@ -7,7 +7,11 @@ import interpreter.lexer.Lexer;
 import interpreter.token.Token;
 import interpreter.token.TokenType;
 import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class ParserTest {
 
@@ -117,5 +121,39 @@ class ParserTest {
                         new ExpressionStatement(
                                 new Token(TokenType.INT, "5"),
                                 new IntegerLiteralExpression(new Token(TokenType.INT, "5"), 5)));
+    }
+
+    private static Stream<Arguments> prefixExpressionsTests() {
+        return Stream.of(
+                Arguments.of("!5;", new Token(TokenType.BANG, "!"), 5),
+                Arguments.of("-15;", new Token(TokenType.MINUS, "-"), 15));
+    }
+
+    @ParameterizedTest
+    @MethodSource("interpreter.ast.ParserTest#prefixExpressionsTests")
+    void testPrefixExpressions(String input, Token expectedToken, Integer expectedIntegerValue) {
+
+        var lexer = new Lexer(input);
+        var parser = Parser.build(lexer);
+
+        var actual = parser.parseProgram();
+        var errors = parser.getErrors();
+
+        assertThat(errors).isEmpty();
+
+        var expectedLiteral =
+                new IntegerLiteralExpression(
+                        new Token(TokenType.INT, expectedIntegerValue.toString()),
+                        expectedIntegerValue);
+
+        assertThat(actual)
+                .isNotNull()
+                .extracting(Program::statements)
+                .asInstanceOf(LIST)
+                .hasSize(1)
+                .containsExactly(
+                        new ExpressionStatement(
+                                new Token(TokenType.INT, expectedIntegerValue.toString()),
+                                new PrefixExpression(expectedToken, expectedLiteral)));
     }
 }
