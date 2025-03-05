@@ -39,7 +39,6 @@ java {
 }
 
 spotless {
-   ratchetFrom("origin/main")
 
 
     format("misc") {

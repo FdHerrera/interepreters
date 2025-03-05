@@ -95,4 +95,27 @@ class ParserTest {
                                 new Token(TokenType.IDENT, "foobar"),
                                 new Identifier(new Token(TokenType.IDENT, "foobar"))));
     }
+
+    @Test
+    void testIntegerLiteralExpressions() {
+        String input = "5;";
+
+        var lexer = new Lexer(input);
+        var parser = Parser.build(lexer);
+
+        var actual = parser.parseProgram();
+        var errors = parser.getErrors();
+
+        assertThat(errors).isEmpty();
+
+        assertThat(actual)
+                .isNotNull()
+                .extracting(Program::statements)
+                .asInstanceOf(LIST)
+                .hasSize(1)
+                .containsExactly(
+                        new ExpressionStatement(
+                                new Token(TokenType.INT, "5"),
+                                new IntegerLiteralExpression(new Token(TokenType.INT, "5"), 5)));
+    }
 }

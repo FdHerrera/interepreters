@@ -23,7 +23,12 @@ public class Parser {
     private Token peekToken;
 
     private final Map<TokenType, Supplier<Expression>> prefixParseFns =
-            Map.of(TokenType.IDENT, () -> new Identifier(currToken));
+            Map.of(
+                    TokenType.IDENT, () -> new Identifier(currToken),
+                    TokenType.INT,
+                            () ->
+                                    new IntegerLiteralExpression(
+                                            currToken, Integer.valueOf(currToken.literal())));
 
     public static Parser build(Lexer lexer) {
         Validate.notNull(lexer, "lexer should not be null");
