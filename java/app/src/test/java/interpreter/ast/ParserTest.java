@@ -223,6 +223,26 @@ class ParserTest {
                                 expectedLeftExpression, expectedOperator, expectedRightExpression));
     }
 
+    @ParameterizedTest
+    @MethodSource("interpreter.ast.OperatorPrecedenceTestCases#testCases")
+    void testOperatorPrecedence(String input, Expression expectedExpression) {
+        var lexer = new Lexer(input);
+        var parser = Parser.build(lexer);
+
+        var actual = parser.parseProgram();
+        var errors = parser.getErrors();
+
+        assertThat(errors).isEmpty();
+
+        assertThat(actual)
+                .isNotNull()
+                .extracting(Program::statements)
+                .asInstanceOf(InstanceOfAssertFactories.collection(ExpressionStatement.class))
+                .hasSize(1)
+                .extracting(ExpressionStatement::expression)
+                .containsExactly(expectedExpression);
+    }
+
     private static IntegerLiteralExpression integerLiteralExpressionOf(Integer val) {
         return new IntegerLiteralExpression(new Token(TokenType.INT, val.toString()), val);
     }
