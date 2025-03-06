@@ -14,6 +14,10 @@ public final class OperatorPrecedenceTestCases {
     private static final Token PLUS_TOKEN = new Token(TokenType.PLUS, "+");
     private static final Token TIMES_TOKEN = new Token(TokenType.ASTERISK, "*");
     private static final Token SLASH_TOKEN = new Token(TokenType.SLASH, "/");
+    private static final Token GT_TOKEN = new Token(TokenType.GT, ">");
+    private static final Token LT_TOKEN = new Token(TokenType.LT, "<");
+    private static final Token EQ_TOKEN = new Token(TokenType.EQ, "==");
+    private static final Token NOT_EQ_TOKEN = new Token(TokenType.NOT_EQ, "!=");
 
     static Stream<Arguments> testCases() {
         return Stream.of(
@@ -145,7 +149,90 @@ public final class OperatorPrecedenceTestCases {
                                                 new PrefixExpression(
                                                         MINUS_TOKEN, integerLiteralExpressionOf(5)),
                                                 TIMES_TOKEN,
-                                                integerLiteralExpressionOf(5))))));
+                                                integerLiteralExpressionOf(5))))),
+                Arguments.of(
+                        "5 > 4 == 3 < 4",
+                        List.of(
+                                new ExpressionStatement(
+                                        integerTokenOf(4),
+                                        new InfixExpression(
+                                                new InfixExpression(
+                                                        integerLiteralExpressionOf(5),
+                                                        GT_TOKEN,
+                                                        integerLiteralExpressionOf(4)),
+                                                EQ_TOKEN,
+                                                new InfixExpression(
+                                                        integerLiteralExpressionOf(3),
+                                                        LT_TOKEN,
+                                                        integerLiteralExpressionOf(4)))))),
+                Arguments.of(
+                        "5 < 4 != 3 > 4",
+                        List.of(
+                                new ExpressionStatement(
+                                        integerTokenOf(4),
+                                        new InfixExpression(
+                                                new InfixExpression(
+                                                        integerLiteralExpressionOf(5),
+                                                        LT_TOKEN,
+                                                        integerLiteralExpressionOf(4)),
+                                                NOT_EQ_TOKEN,
+                                                new InfixExpression(
+                                                        integerLiteralExpressionOf(3),
+                                                        GT_TOKEN,
+                                                        integerLiteralExpressionOf(4)))))),
+                // 3 + 4 * 5 == 3 * 1 + 4 * 5
+                // ((3 + (4 * 5)) == ((3 * 1) + (4 * 5))),
+                Arguments.of(
+                        "3 + 4 * 5 == 3 * 1 + 4 * 5",
+                        List.of(
+                                new ExpressionStatement(
+                                        integerTokenOf(5),
+                                        new InfixExpression(
+                                                new InfixExpression(
+                                                        integerLiteralExpressionOf(3),
+                                                        PLUS_TOKEN,
+                                                        new InfixExpression(
+                                                                integerLiteralExpressionOf(4),
+                                                                TIMES_TOKEN,
+                                                                integerLiteralExpressionOf(5))),
+                                                EQ_TOKEN,
+                                                new InfixExpression(
+                                                        new InfixExpression(
+                                                                integerLiteralExpressionOf(3),
+                                                                TIMES_TOKEN,
+                                                                integerLiteralExpressionOf(1)),
+                                                        PLUS_TOKEN,
+                                                        new InfixExpression(
+                                                                integerLiteralExpressionOf(4),
+                                                                TIMES_TOKEN,
+                                                                integerLiteralExpressionOf(5))))))),
+                // 3 + 4 * 5 == 3 * 1 + 4 * 5
+                // ((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))
+                Arguments.of(
+                        "3 + 4 * 5 == 3 * 1 + 4 * 5",
+                        List.of(
+                                new ExpressionStatement(
+                                        integerTokenOf(5),
+                                        new InfixExpression(
+                                                new InfixExpression(
+                                                        integerLiteralExpressionOf(3),
+                                                        PLUS_TOKEN,
+                                                        new InfixExpression(
+                                                                integerLiteralExpressionOf(4),
+                                                                TIMES_TOKEN,
+                                                                integerLiteralExpressionOf(5))),
+                                                EQ_TOKEN,
+                                                new InfixExpression(
+                                                        new InfixExpression(
+                                                                integerLiteralExpressionOf(3),
+                                                                TIMES_TOKEN,
+                                                                integerLiteralExpressionOf(1)),
+                                                        PLUS_TOKEN,
+                                                        new InfixExpression(
+                                                                integerLiteralExpressionOf(4),
+                                                                TIMES_TOKEN,
+                                                                integerLiteralExpressionOf(
+                                                                        5))))))));
     }
 
     private static Identifier identifierOf(String literal) {
@@ -157,6 +244,10 @@ public final class OperatorPrecedenceTestCases {
     }
 
     private static IntegerLiteralExpression integerLiteralExpressionOf(Integer val) {
-        return new IntegerLiteralExpression(new Token(TokenType.INT, val.toString()), val);
+        return new IntegerLiteralExpression(integerTokenOf(val), val);
+    }
+
+    private static Token integerTokenOf(Integer val) {
+        return new Token(TokenType.INT, val.toString());
     }
 }
