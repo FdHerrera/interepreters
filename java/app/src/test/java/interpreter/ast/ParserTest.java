@@ -2,6 +2,7 @@ package interpreter.ast;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
+import static org.assertj.core.api.InstanceOfAssertFactories.collection;
 
 import interpreter.lexer.Lexer;
 import interpreter.token.Token;
@@ -225,7 +226,7 @@ class ParserTest {
 
     @ParameterizedTest
     @MethodSource("interpreter.ast.OperatorPrecedenceTestCases#testCases")
-    void testOperatorPrecedence(String input, Expression expectedExpression) {
+    void testOperatorPrecedence(String input, List<ExpressionStatement> expectedStatements) {
         var lexer = new Lexer(input);
         var parser = Parser.build(lexer);
 
@@ -237,10 +238,8 @@ class ParserTest {
         assertThat(actual)
                 .isNotNull()
                 .extracting(Program::statements)
-                .asInstanceOf(InstanceOfAssertFactories.collection(ExpressionStatement.class))
-                .hasSize(1)
-                .extracting(ExpressionStatement::expression)
-                .containsExactly(expectedExpression);
+                .asInstanceOf(collection(Statement.class))
+                .isEqualTo(expectedStatements);
     }
 
     private static IntegerLiteralExpression integerLiteralExpressionOf(Integer val) {
