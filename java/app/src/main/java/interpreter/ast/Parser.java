@@ -35,7 +35,15 @@ public class Parser {
                     TokenType.BANG,
                     this::parsePrefixExpression,
                     TokenType.MINUS,
-                    this::parsePrefixExpression);
+                    this::parsePrefixExpression,
+                    TokenType.TRUE,
+                    () ->
+                            new BooleanLiteralExpression(
+                                    currToken, Boolean.valueOf(currToken.literal())),
+                    TokenType.FALSE,
+                    () ->
+                            new BooleanLiteralExpression(
+                                    currToken, Boolean.valueOf(currToken.literal())));
 
     private final Map<TokenType, UnaryOperator<Expression>> infixParseFns =
             Map.of(

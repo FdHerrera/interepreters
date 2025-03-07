@@ -1,5 +1,16 @@
 package interpreter.ast;
 
+import static interpreter.ast.ParserTestHelpers.ASTERISK_TOKEN;
+import static interpreter.ast.ParserTestHelpers.EQ_TOKEN;
+import static interpreter.ast.ParserTestHelpers.FALSE_TOKEN;
+import static interpreter.ast.ParserTestHelpers.GT_TOKEN;
+import static interpreter.ast.ParserTestHelpers.LT_TOKEN;
+import static interpreter.ast.ParserTestHelpers.MINUS_TOKEN;
+import static interpreter.ast.ParserTestHelpers.NOT_EQ_TOKEN;
+import static interpreter.ast.ParserTestHelpers.PLUS_TOKEN;
+import static interpreter.ast.ParserTestHelpers.SLASH_TOKEN;
+import static interpreter.ast.ParserTestHelpers.TRUE_TOKEN;
+import static interpreter.ast.ParserTestHelpers.booleanLiteralExpressionOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 import static org.assertj.core.api.InstanceOfAssertFactories.collection;
@@ -124,6 +135,65 @@ class ParserTest {
                                 new Token(TokenType.INT, "5"), integerLiteralExpressionOf(5)));
     }
 
+    static Stream<Arguments> testBooleanLiteralExpressions_arguments() {
+        return Stream.of(
+                Arguments.of(
+                        "true",
+                        List.of(
+                                new ExpressionStatement(
+                                        TRUE_TOKEN, booleanLiteralExpressionOf(true)))),
+                Arguments.of(
+                        "false",
+                        List.of(
+                                new ExpressionStatement(
+                                        FALSE_TOKEN, booleanLiteralExpressionOf(false)))),
+                Arguments.of(
+                        "3 > 5 == false",
+                        List.of(
+                                new ExpressionStatement(
+                                        FALSE_TOKEN,
+                                        new InfixExpression(
+                                                new InfixExpression(
+                                                        ParserTestHelpers
+                                                                .integerLiteralExpressionOf(3),
+                                                        GT_TOKEN,
+                                                        integerLiteralExpressionOf(5)),
+                                                EQ_TOKEN,
+                                                booleanLiteralExpressionOf(false))))),
+                Arguments.of(
+                        "3 < 5 == true",
+                        List.of(
+                                new ExpressionStatement(
+                                        TRUE_TOKEN,
+                                        new InfixExpression(
+                                                new InfixExpression(
+                                                        ParserTestHelpers
+                                                                .integerLiteralExpressionOf(3),
+                                                        LT_TOKEN,
+                                                        integerLiteralExpressionOf(5)),
+                                                EQ_TOKEN,
+                                                booleanLiteralExpressionOf(true))))));
+    }
+
+    @ParameterizedTest
+    @MethodSource("interpreter.ast.ParserTest#testBooleanLiteralExpressions_arguments")
+    void testBooleanLiteralExpressions(String input, List<Statement> expectedStatements) {
+        var lexer = new Lexer(input);
+        var parser = Parser.build(lexer);
+
+        var actual = parser.parseProgram();
+        var errors = parser.getErrors();
+
+        assertThat(errors).isEmpty();
+
+        assertThat(actual)
+                .isNotNull()
+                .extracting(Program::statements)
+                .asInstanceOf(LIST)
+                .hasSize(expectedStatements.size())
+                .isEqualTo(expectedStatements);
+    }
+
     private static Stream<Arguments> prefixExpressionsTests() {
         return Stream.of(
                 Arguments.of("!5;", new Token(TokenType.BANG, "!"), 5),
@@ -159,43 +229,58 @@ class ParserTest {
                 Arguments.of(
                         "5 + 5;",
                         integerLiteralExpressionOf(5),
-                        new Token(TokenType.PLUS, "+"),
+                        PLUS_TOKEN,
                         integerLiteralExpressionOf(5)),
                 Arguments.of(
                         "5 - 5;",
                         integerLiteralExpressionOf(5),
-                        new Token(TokenType.MINUS, "-"),
+                        MINUS_TOKEN,
                         integerLiteralExpressionOf(5)),
                 Arguments.of(
                         "5 * 5;",
                         integerLiteralExpressionOf(5),
-                        new Token(TokenType.ASTERISK, "*"),
+                        ASTERISK_TOKEN,
                         integerLiteralExpressionOf(5)),
                 Arguments.of(
                         "5 / 5;",
                         integerLiteralExpressionOf(5),
-                        new Token(TokenType.SLASH, "/"),
+                        SLASH_TOKEN,
                         integerLiteralExpressionOf(5)),
                 Arguments.of(
                         "5 > 5;",
                         integerLiteralExpressionOf(5),
-                        new Token(TokenType.GT, ">"),
+                        GT_TOKEN,
                         integerLiteralExpressionOf(5)),
                 Arguments.of(
                         "5 < 5;",
                         integerLiteralExpressionOf(5),
-                        new Token(TokenType.LT, "<"),
+                        LT_TOKEN,
                         integerLiteralExpressionOf(5)),
                 Arguments.of(
                         "5 == 5;",
                         integerLiteralExpressionOf(5),
-                        new Token(TokenType.EQ, "=="),
+                        EQ_TOKEN,
                         integerLiteralExpressionOf(5)),
                 Arguments.of(
                         "5 != 5;",
                         integerLiteralExpressionOf(5),
-                        new Token(TokenType.NOT_EQ, "!="),
-                        integerLiteralExpressionOf(5)));
+                        NOT_EQ_TOKEN,
+                        integerLiteralExpressionOf(5)),
+                Arguments.of(
+                        "true == true",
+                        booleanLiteralExpressionOf(true),
+                        EQ_TOKEN,
+                        booleanLiteralExpressionOf(true)),
+                Arguments.of(
+                        "true != true",
+                        booleanLiteralExpressionOf(true),
+                        NOT_EQ_TOKEN,
+                        booleanLiteralExpressionOf(true)),
+                Arguments.of(
+                        "false == false",
+                        booleanLiteralExpressionOf(false),
+                        EQ_TOKEN,
+                        booleanLiteralExpressionOf(false)));
     }
 
     @ParameterizedTest

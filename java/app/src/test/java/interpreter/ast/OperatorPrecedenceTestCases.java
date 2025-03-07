@@ -1,5 +1,18 @@
 package interpreter.ast;
 
+import static interpreter.ast.ParserTestHelpers.EQ_TOKEN;
+import static interpreter.ast.ParserTestHelpers.GT_TOKEN;
+import static interpreter.ast.ParserTestHelpers.LT_TOKEN;
+import static interpreter.ast.ParserTestHelpers.MINUS_TOKEN;
+import static interpreter.ast.ParserTestHelpers.NOT_EQ_TOKEN;
+import static interpreter.ast.ParserTestHelpers.PLUS_TOKEN;
+import static interpreter.ast.ParserTestHelpers.SLASH_TOKEN;
+import static interpreter.ast.ParserTestHelpers.TIMES_TOKEN;
+import static interpreter.ast.ParserTestHelpers.identifierOf;
+import static interpreter.ast.ParserTestHelpers.identifierTokenOf;
+import static interpreter.ast.ParserTestHelpers.integerLiteralExpressionOf;
+import static interpreter.ast.ParserTestHelpers.integerTokenOf;
+
 import interpreter.token.Token;
 import interpreter.token.TokenType;
 import java.util.List;
@@ -10,14 +23,6 @@ import org.junit.jupiter.params.provider.Arguments;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class OperatorPrecedenceTestCases {
-    private static final Token MINUS_TOKEN = new Token(TokenType.MINUS, "-");
-    private static final Token PLUS_TOKEN = new Token(TokenType.PLUS, "+");
-    private static final Token TIMES_TOKEN = new Token(TokenType.ASTERISK, "*");
-    private static final Token SLASH_TOKEN = new Token(TokenType.SLASH, "/");
-    private static final Token GT_TOKEN = new Token(TokenType.GT, ">");
-    private static final Token LT_TOKEN = new Token(TokenType.LT, "<");
-    private static final Token EQ_TOKEN = new Token(TokenType.EQ, "==");
-    private static final Token NOT_EQ_TOKEN = new Token(TokenType.NOT_EQ, "!=");
 
     static Stream<Arguments> testCases() {
         return Stream.of(
@@ -233,21 +238,5 @@ public final class OperatorPrecedenceTestCases {
                                                                 TIMES_TOKEN,
                                                                 integerLiteralExpressionOf(
                                                                         5))))))));
-    }
-
-    private static Identifier identifierOf(String literal) {
-        return new Identifier(identifierTokenOf(literal));
-    }
-
-    private static Token identifierTokenOf(String literal) {
-        return new Token(TokenType.IDENT, literal);
-    }
-
-    private static IntegerLiteralExpression integerLiteralExpressionOf(Integer val) {
-        return new IntegerLiteralExpression(integerTokenOf(val), val);
-    }
-
-    private static Token integerTokenOf(Integer val) {
-        return new Token(TokenType.INT, val.toString());
     }
 }
