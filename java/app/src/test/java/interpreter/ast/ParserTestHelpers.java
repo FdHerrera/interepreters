@@ -18,6 +18,8 @@ class ParserTestHelpers {
     public static final Token TRUE_TOKEN = new Token(TokenType.TRUE, "true");
     public static final Token FALSE_TOKEN = new Token(TokenType.FALSE, "false");
     public static final Token ASTERISK_TOKEN = new Token(TokenType.ASTERISK, "*");
+    public static final Token RPAREN_TOKEN = new Token(TokenType.RPAREN, ")");
+    public static final Token BANG_TOKEN = new Token(TokenType.BANG, "!");
 
     public static Identifier identifierOf(String literal) {
         return new Identifier(identifierTokenOf(literal));

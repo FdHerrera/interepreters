@@ -43,7 +43,9 @@ public class Parser {
                     TokenType.FALSE,
                     () ->
                             new BooleanLiteralExpression(
-                                    currToken, Boolean.valueOf(currToken.literal())));
+                                    currToken, Boolean.valueOf(currToken.literal())),
+                    TokenType.LPAREN,
+                    this::parseGroupedExpression);
 
     private final Map<TokenType, UnaryOperator<Expression>> infixParseFns =
             Map.of(
@@ -93,14 +95,14 @@ public class Parser {
     }
 
     private LetStatement parseLetStatement() {
-        if (!expectPeek(TokenType.IDENT)) {
+        if (peekIsNot(TokenType.IDENT)) {
             return null;
         }
 
         LetStatement statement = new LetStatement(currToken, new Identifier(peekToken));
         nextToken();
 
-        if (!expectPeek(TokenType.ASSIGN)) {
+        if (peekIsNot(TokenType.ASSIGN)) {
             return null;
         }
         while (!currToken.type().equals(TokenType.SEMICOLON)) {
@@ -167,12 +169,23 @@ public class Parser {
         return new InfixExpression(left, operator, right);
     }
 
-    private boolean expectPeek(TokenType expectedPeekType) {
-        if (expectedPeekType.equals(peekToken.type())) {
-            return true;
-        } else {
-            peekError(expectedPeekType);
+    private Expression parseGroupedExpression() {
+        nextToken();
+        var expression = parseExpression(Precedence.LOWEST);
+
+        if (peekIsNot(TokenType.RPAREN)) {
+            return null;
+        }
+        nextToken();
+        return expression;
+    }
+
+    private boolean peekIsNot(TokenType peekType) {
+        if (peekType.equals(peekToken.type())) {
             return false;
+        } else {
+            peekError(peekType);
+            return true;
         }
     }
 

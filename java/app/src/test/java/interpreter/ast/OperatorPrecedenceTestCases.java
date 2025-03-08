@@ -1,13 +1,17 @@
 package interpreter.ast;
 
+import static interpreter.ast.ParserTestHelpers.ASTERISK_TOKEN;
+import static interpreter.ast.ParserTestHelpers.BANG_TOKEN;
 import static interpreter.ast.ParserTestHelpers.EQ_TOKEN;
 import static interpreter.ast.ParserTestHelpers.GT_TOKEN;
 import static interpreter.ast.ParserTestHelpers.LT_TOKEN;
 import static interpreter.ast.ParserTestHelpers.MINUS_TOKEN;
 import static interpreter.ast.ParserTestHelpers.NOT_EQ_TOKEN;
 import static interpreter.ast.ParserTestHelpers.PLUS_TOKEN;
+import static interpreter.ast.ParserTestHelpers.RPAREN_TOKEN;
 import static interpreter.ast.ParserTestHelpers.SLASH_TOKEN;
 import static interpreter.ast.ParserTestHelpers.TIMES_TOKEN;
+import static interpreter.ast.ParserTestHelpers.booleanLiteralExpressionOf;
 import static interpreter.ast.ParserTestHelpers.identifierOf;
 import static interpreter.ast.ParserTestHelpers.identifierTokenOf;
 import static interpreter.ast.ParserTestHelpers.integerLiteralExpressionOf;
@@ -236,7 +240,72 @@ public final class OperatorPrecedenceTestCases {
                                                         new InfixExpression(
                                                                 integerLiteralExpressionOf(4),
                                                                 TIMES_TOKEN,
-                                                                integerLiteralExpressionOf(
-                                                                        5))))))));
+                                                                integerLiteralExpressionOf(5))))))),
+                Arguments.of(
+                        "1 + (2 + 3) + 4",
+                        // ((1 + (2 + 3)) + 4)
+                        List.of(
+                                new ExpressionStatement(
+                                        integerTokenOf(4),
+                                        new InfixExpression(
+                                                new InfixExpression(
+                                                        integerLiteralExpressionOf(1),
+                                                        PLUS_TOKEN,
+                                                        new InfixExpression(
+                                                                integerLiteralExpressionOf(2),
+                                                                PLUS_TOKEN,
+                                                                integerLiteralExpressionOf(3))),
+                                                PLUS_TOKEN,
+                                                integerLiteralExpressionOf(4))))),
+                Arguments.of(
+                        "(5 + 5) * 2",
+                        // (5 + 5) * 2"
+                        List.of(
+                                new ExpressionStatement(
+                                        integerTokenOf(2),
+                                        new InfixExpression(
+                                                new InfixExpression(
+                                                        integerLiteralExpressionOf(5),
+                                                        PLUS_TOKEN,
+                                                        integerLiteralExpressionOf(5)),
+                                                ASTERISK_TOKEN,
+                                                integerLiteralExpressionOf(2))))),
+                Arguments.of(
+                        "2 / (5 + 5)",
+                        // (2 / (5 + 5))
+                        List.of(
+                                new ExpressionStatement(
+                                        RPAREN_TOKEN,
+                                        new InfixExpression(
+                                                integerLiteralExpressionOf(2),
+                                                SLASH_TOKEN,
+                                                new InfixExpression(
+                                                        integerLiteralExpressionOf(5),
+                                                        PLUS_TOKEN,
+                                                        integerLiteralExpressionOf(5)))))),
+                Arguments.of(
+                        "-(5 + 5)",
+                        // (-(5 + 5))
+                        List.of(
+                                new ExpressionStatement(
+                                        RPAREN_TOKEN,
+                                        new PrefixExpression(
+                                                MINUS_TOKEN,
+                                                new InfixExpression(
+                                                        integerLiteralExpressionOf(5),
+                                                        PLUS_TOKEN,
+                                                        integerLiteralExpressionOf(5)))))),
+                Arguments.of(
+                        "!(true == true)",
+                        // (!(true == true))
+                        List.of(
+                                new ExpressionStatement(
+                                        RPAREN_TOKEN,
+                                        new PrefixExpression(
+                                                BANG_TOKEN,
+                                                new InfixExpression(
+                                                        booleanLiteralExpressionOf(true),
+                                                        EQ_TOKEN,
+                                                        booleanLiteralExpressionOf(true)))))));
     }
 }
